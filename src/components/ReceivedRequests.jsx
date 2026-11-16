@@ -19,6 +19,8 @@ import { FaLinkedin } from "react-icons/fa";
 import { usePendingRequest, useUpdateRequest } from "../hooks/useRequest";
 import { formatRelativeTime } from "../utils/formatRelativeTime";
 import DevCircleLoader from "../common/DevCircleLoader";
+import SubscriptionBadge from "../common/SubscriptionBadge";
+
 
 const ReceivedRequests = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -64,6 +66,8 @@ const ReceivedRequests = () => {
           githubUrl: user?.githubUrl || "",
           photoUrl: user?.photoUrl || "",
           createdAt: request.createdAt,
+          currentPlan: user.currentPlan,
+          isUserHavePlan: user.isUserHavePlan
         };
       });
   }, [data]);
@@ -189,9 +193,17 @@ const ReceivedRequests = () => {
 
                           <div className="min-w-0 flex-1">
                             <div className="flex items-start justify-between gap-2">
-                              <p className="truncate text-sm font-semibold text-[#F0F2F5]">
-                                {request.name}
-                              </p>
+                              <div className="flex min-w-0 items-center gap-1.5">
+                                <p className="truncate text-sm font-semibold text-[#F0F2F5]">
+                                  {request.name}
+                                </p>
+                                {request.isUserHavePlan === true && (
+                                  <SubscriptionBadge
+                                    plan={request.currentPlan}
+                                    size={15}
+                                  />
+                                )}
+                              </div>
                               <span className="shrink-0 pt-0.5 text-[10px] text-[#758193]">
                                 {formatRelativeTime(request.createdAt)}
                               </span>
@@ -273,6 +285,12 @@ const ReceivedRequests = () => {
                       <div className="min-w-0">
                         <h3 className="text-2xl font-semibold tracking-tight text-[#F0F2F5] sm:text-3xl">
                           {selectedRequest.name}
+                          {selectedRequest.isUserHavePlan === true && (
+                            <SubscriptionBadge
+                              plan={selectedRequest.currentPlan}
+                              size={20}
+                            />
+                          )}
                         </h3>
                         <p className="mt-2 flex items-center gap-2 text-sm text-[#A7B7CD]">
                           <MapPin size={15} />

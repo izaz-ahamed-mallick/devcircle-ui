@@ -15,6 +15,7 @@ import ConnectionsPage from "../pages/ConnectionsPage";
 import FeedPage from "../pages/FeedPage";
 import VerifyEmail from "../pages/VerifyEmail";
 import ForgotPasswordPage from "../pages/auth/ForgotPasswordPage";
+import PricingPage from "../pages/plans/PricingPage";
 
 
 const AppRoutes = () => {
@@ -37,6 +38,7 @@ const AppRoutes = () => {
           {/* Add these routes when the pages are ready */}
           <Route path="/connections" element={<ConnectionsPage />} />
           <Route path="/requests" element={<RequestsPage />} />
+          <Route path="/plans" element={<PricingPage />} />
           {/* <Route path="/messages" element={<MessagesPage />} /> */}
         </Route>
       </Route>

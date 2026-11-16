@@ -4,6 +4,7 @@ import { ShieldCheck, LoaderCircle, RefreshCw } from "lucide-react";
 import { useCurrentUser } from "../hooks/useCurrentUser";
 import DevCircleLoader from "../common/DevCircleLoader";
 
+
 const PrivateRoute = () => {
   const {
     data: user,

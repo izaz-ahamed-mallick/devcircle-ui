@@ -23,10 +23,10 @@ import {
 import { FaGithub, FaLinkedin } from "react-icons/fa";
 import { toast } from "sonner";
 import { useCurrentUser, useUpdateProfile } from "../hooks/useCurrentUser";
-import DevCircleLoader from "../common/DevCircleLoader";
 import CommonError from "../common/CommonError";
 import LocationInput from "../common/LocationInput";
 import { getChangedFields } from "../utils/getChangedFields";
+import DevCircleLoader from "../common/DevCircleLoader";
 // Import your profile-update mutation hook when it is ready.
 
 const ProfilePage = () => {

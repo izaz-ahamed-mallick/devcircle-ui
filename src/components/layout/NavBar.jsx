@@ -1,23 +1,33 @@
-
 import { useState, useRef, useEffect } from "react";
-import { Link, useNavigate } from "react-router";
+import { Link } from "react-router";
 import {
   Bell,
   ChevronDown,
+  CreditCard,
   LogOut,
   Settings,
+  Sparkles,
   UserRound,
+  Crown,
+  Gem,
 } from "lucide-react";
-import { useQueryClient } from "@tanstack/react-query";
 import { useCurrentUser } from "../../hooks/useCurrentUser";
 import { useLogOut } from "../../hooks/useAuth";
+import { useSubscription } from "../../hooks/useSubscription";
+import SubscriptionBadge from "../../common/SubscriptionBadge";
 
 const Navbar = () => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const profileRef = useRef(null);
-  const { mutate, isPending, isError } = useLogOut()
 
-  const { data: user } = useCurrentUser();
+  const { mutate, isPending, isError } = useLogOut();
+  const {
+    user,
+    hasActivePlan,
+    currentPlan,
+    isPremium,
+    isPro,
+  } = useSubscription();
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -41,6 +51,8 @@ const Navbar = () => {
     mutate();
   };
 
+  const closeProfileMenu = () => setIsProfileOpen(false);
+
   return (
     <header className="sticky top-0 z-50 w-full border-b border-white/[0.07] bg-[#0B0D10]/95 backdrop-blur-xl">
       <nav className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between gap-3 px-4 sm:h-[72px] sm:px-6 lg:px-8">
@@ -59,6 +71,40 @@ const Navbar = () => {
 
         {/* User actions */}
         <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+          {/* Subscription Plan */}
+          {user && (
+            <Link
+              to="/plans"
+              className={`group inline-flex h-10 items-center gap-2 rounded-xl border px-3 text-sm font-semibold shadow-lg shadow-black/10 transition duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#A7B7CD] sm:px-4 ${isPremium || isPro
+                ? "border-emerald-500/25 bg-emerald-500/[0.07] text-emerald-400 hover:border-emerald-500/40 hover:bg-emerald-500/[0.12]"
+                : "border-[#596C8B]/40 bg-[#202B3A] text-[#DCE7F7] hover:border-[#819BC2]/60 hover:bg-[#29384B] hover:text-white"
+                }`}
+            >
+              {isPremium ? (
+                <Crown size={16} className="shrink-0" />
+              ) : isPro ? (
+                <Gem size={16} className="shrink-0" />
+              ) : (
+                <Sparkles
+                  size={16}
+                  className="shrink-0 transition-transform group-hover:rotate-12"
+                />
+              )}
+
+              <span className="hidden sm:inline">
+                {isPremium
+                  ? "Premium Member"
+                  : isPro
+                    ? "Pro Member"
+                    : "Upgrade Plan"}
+              </span>
+
+              <span className="sm:hidden">
+                {isPremium ? "Premium" : isPro ? "Pro" : "Upgrade"}
+              </span>
+            </Link>
+          )}
+
           {/* Notifications */}
           <button
             type="button"
@@ -95,8 +141,12 @@ const Navbar = () => {
                   </span>
                 )}
 
-                <span className="hidden max-w-28 truncate text-sm font-medium text-[#F0F2F5] sm:block">
+                <span className="hidden max-w-28 items-center gap-1.5 truncate text-sm font-medium text-[#F0F2F5] sm:flex">
                   {user.firstName || "My Account"}
+
+                  {hasActivePlan && (
+                    <SubscriptionBadge plan={currentPlan} size={15} />
+                  )}
                 </span>
 
                 <ChevronDown
@@ -108,11 +158,14 @@ const Navbar = () => {
 
               {isProfileOpen && (
                 <div className="absolute right-0 top-full mt-3 w-60 overflow-hidden rounded-2xl border border-[#2B3039] bg-[#11151B] p-2 shadow-2xl shadow-black/30">
+                  {/* User information */}
                   <div className="border-b border-[#2B3039] px-3 py-3">
-                    <p className="truncate text-sm font-semibold text-[#F0F2F5]">
-                      {[user.firstName, user.lastName]
-                        .filter(Boolean)
-                        .join(" ") || "Developer"}
+                    <p className="flex items-center gap-1.5 truncate text-sm font-semibold text-[#F0F2F5]">
+                      {[user.firstName, user.lastName].filter(Boolean).join(" ") || "Developer"}
+
+                      {hasActivePlan && (
+                        <SubscriptionBadge plan={currentPlan} size={15} />
+                      )}
                     </p>
 
                     <p className="mt-1 truncate text-xs text-[#8B929E]">
@@ -120,10 +173,11 @@ const Navbar = () => {
                     </p>
                   </div>
 
-                  <div className="py-2">
+                  {/* Menu items */}
+                  <div className="space-y-1 py-2">
                     <Link
                       to="/profile"
-                      onClick={() => setIsProfileOpen(false)}
+                      onClick={closeProfileMenu}
                       className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-[#B8C0CC] transition hover:bg-[#1B222C] hover:text-[#F0F2F5]"
                     >
                       <UserRound size={17} />
@@ -131,8 +185,17 @@ const Navbar = () => {
                     </Link>
 
                     <Link
+                      to="/plans"
+                      onClick={closeProfileMenu}
+                      className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-[#B8C0CC] transition hover:bg-[#1B222C] hover:text-[#F0F2F5]"
+                    >
+                      <CreditCard size={17} />
+                      My Subscription
+                    </Link>
+
+                    <Link
                       to="/settings"
-                      onClick={() => setIsProfileOpen(false)}
+                      onClick={closeProfileMenu}
                       className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-[#B8C0CC] transition hover:bg-[#1B222C] hover:text-[#F0F2F5]"
                     >
                       <Settings size={17} />
@@ -140,6 +203,7 @@ const Navbar = () => {
                     </Link>
                   </div>
 
+                  {/* Logout */}
                   <div className="border-t border-[#2B3039] pt-2">
                     <button
                       type="button"

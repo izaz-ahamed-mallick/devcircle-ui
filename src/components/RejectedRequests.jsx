@@ -1,6 +1,6 @@
 import { Inbox, ArrowUpRight, UserRound } from "lucide-react";
-import DevCircleLoader from "../common/DevCircleLoader";
 import { useRejectedRequest } from "../hooks/useRequest";
+import DevCircleLoader from "../common/DevCircleLoader";
 
 const RejectedRequests = () => {
   const { data, isLoading, isError } = useRejectedRequest();

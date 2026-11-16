@@ -1,5 +1,6 @@
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import {
   X,
   MapPin,
@@ -10,10 +11,15 @@ import {
   ArrowUpRight,
 } from "lucide-react";
 import { FaGithub, FaLinkedin } from "react-icons/fa";
+import SubscriptionBadge from "../common/SubscriptionBadge";
 
 const ProfileDetailsModal = ({ user, onClose }) => {
+  const [imageError, setImageError] = useState(false);
+
   useEffect(() => {
     if (!user) return;
+
+    const previousOverflow = document.body.style.overflow;
 
     const handleEscape = (event) => {
       if (event.key === "Escape") onClose();
@@ -24,9 +30,13 @@ const ProfileDetailsModal = ({ user, onClose }) => {
 
     return () => {
       document.removeEventListener("keydown", handleEscape);
-      document.body.style.overflow = "";
+      document.body.style.overflow = previousOverflow;
     };
   }, [user, onClose]);
+
+  useEffect(() => {
+    setImageError(false);
+  }, [user?._id, user?.photoUrl]);
 
   if (!user) return null;
 
@@ -35,6 +45,7 @@ const ProfileDetailsModal = ({ user, onClose }) => {
     "Developer";
 
   const location = user.location;
+
   const locationText =
     typeof location === "string"
       ? location
@@ -44,9 +55,9 @@ const ProfileDetailsModal = ({ user, onClose }) => {
 
   const skills = Array.isArray(user.skills) ? user.skills : [];
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-[#05070B]/80 p-3 backdrop-blur-xl sm:p-6"
+      className="fixed inset-0 z-[9999] flex items-center justify-center bg-[#05070B]/80 p-3 backdrop-blur-xl sm:p-6"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) onClose();
       }}
@@ -62,11 +73,12 @@ const ProfileDetailsModal = ({ user, onClose }) => {
         <div className="pointer-events-none absolute -bottom-28 -left-20 size-64 rounded-full bg-[#F06A8C]/10 blur-[100px]" />
 
         {/* Header */}
-        <header className="relative flex shrink-0 items-center justify-between border-b border-white/[0.07] px-5 py-4 sm:px-7">
+        <header className="relative z-10 flex shrink-0 items-center justify-between border-b border-white/[0.07] px-5 py-4 sm:px-7">
           <div className="flex items-center gap-3">
             <div className="flex size-10 items-center justify-center rounded-xl border border-[#718DFF]/20 bg-[#718DFF]/10 text-[#A7B7FF]">
               <Sparkles size={19} />
             </div>
+
             <div>
               <p className="text-sm font-semibold text-[#F0F2F5]">
                 Developer profile
@@ -88,7 +100,7 @@ const ProfileDetailsModal = ({ user, onClose }) => {
         </header>
 
         {/* Scrollable profile content */}
-        <div className="relative overflow-y-auto overscroll-contain">
+        <div className="relative min-h-0 flex-1 overflow-y-auto overscroll-contain">
           {/* Profile hero */}
           <div className="relative p-5 sm:p-7">
             <div className="absolute inset-x-0 top-0 h-44 bg-gradient-to-b from-[#718DFF]/[0.08] to-transparent" />
@@ -99,10 +111,11 @@ const ProfileDetailsModal = ({ user, onClose }) => {
                 <div className="absolute -inset-1 rounded-[25px] bg-gradient-to-br from-[#718DFF] via-[#526DFF]/40 to-[#F06A8C]/70 opacity-80 blur-[2px]" />
 
                 <div className="relative size-32 overflow-hidden rounded-[22px] border border-white/10 bg-[#171D26] sm:size-36">
-                  {user.photoUrl ? (
+                  {user.photoUrl && !imageError ? (
                     <img
                       src={user.photoUrl}
                       alt={name}
+                      onError={() => setImageError(true)}
                       className="size-full object-cover object-center"
                     />
                   ) : (
@@ -127,8 +140,16 @@ const ProfileDetailsModal = ({ user, onClose }) => {
                   THE DEVELOPER
                 </p>
 
-                <h2 className="break-words text-2xl font-bold tracking-tight text-white sm:text-3xl">
-                  {name}
+                {/* Developer name and subscription badge */}
+                <h2 className="flex flex-wrap items-center justify-center gap-2 break-words text-2xl font-bold tracking-tight text-white sm:justify-start sm:text-3xl">
+                  <span>{name}</span>
+
+                  {user.isUserHavePlan === true && (
+                    <SubscriptionBadge
+                      plan={user.currentPlan}
+                      size={21}
+                    />
+                  )}
                 </h2>
 
                 {user.age != null && user.age !== "" && (
@@ -139,11 +160,15 @@ const ProfileDetailsModal = ({ user, onClose }) => {
 
                 {locationText && (
                   <p className="mt-2 flex items-center justify-center gap-1.5 text-sm text-[#9BA8BA] sm:justify-start">
-                    <MapPin size={15} className="shrink-0 text-[#8298FF]" />
+                    <MapPin
+                      size={15}
+                      className="shrink-0 text-[#8298FF]"
+                    />
                     <span>{locationText}</span>
                   </p>
                 )}
 
+                {/* Social links */}
                 <div className="mt-4 flex flex-wrap items-center justify-center gap-2 sm:justify-start">
                   {user.githubUrl && (
                     <a
@@ -187,6 +212,7 @@ const ProfileDetailsModal = ({ user, onClose }) => {
                 <div className="flex size-9 items-center justify-center rounded-xl border border-[#718DFF]/15 bg-[#718DFF]/[0.08] text-[#8298FF]">
                   <Quote size={17} />
                 </div>
+
                 <div>
                   <h3 className="text-sm font-semibold text-[#F0F2F5]">
                     A little about me
@@ -211,6 +237,7 @@ const ProfileDetailsModal = ({ user, onClose }) => {
                 <div className="flex size-9 items-center justify-center rounded-xl border border-[#F06A8C]/15 bg-[#F06A8C]/[0.07] text-[#F18CA5]">
                   <Code2 size={17} />
                 </div>
+
                 <div>
                   <h3 className="text-sm font-semibold text-[#F0F2F5]">
                     Skills & technologies
@@ -219,6 +246,7 @@ const ProfileDetailsModal = ({ user, onClose }) => {
                     Tools they enjoy working with
                   </p>
                 </div>
+
                 <span className="ml-auto rounded-lg border border-white/[0.07] bg-white/[0.03] px-2.5 py-1 text-xs text-[#9BA8BA]">
                   {skills.length}
                 </span>
@@ -254,6 +282,7 @@ const ProfileDetailsModal = ({ user, onClose }) => {
                 <div className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-xl bg-[#718DFF]/10 text-[#9BABFF]">
                   <Sparkles size={17} />
                 </div>
+
                 <div>
                   <p className="text-sm font-semibold text-[#E4EAF5]">
                     Every developer has a story.
@@ -269,13 +298,14 @@ const ProfileDetailsModal = ({ user, onClose }) => {
         </div>
 
         {/* Footer */}
-        <footer className="relative flex shrink-0 items-center justify-between gap-3 border-t border-white/[0.07] bg-[#0E1219]/95 px-5 py-4 sm:px-7">
+        <footer className="relative z-10 flex shrink-0 items-center justify-between gap-3 border-t border-white/[0.07] bg-[#0E1219]/95 px-5 py-4 sm:px-7">
           <p className="text-[11px] text-[#718096]">
             <span className="text-[#8298FF]">●</span> Profile preview
           </p>
         </footer>
       </section>
-    </div>
+    </div>,
+    document.body
   );
 };
 
